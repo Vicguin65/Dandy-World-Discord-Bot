@@ -1,0 +1,5 @@
+Complete happy path from selecting toon 
+    FIX JoinPartyButton
+    creation of room happens first, store that information
+
+Clear voice and text channels
