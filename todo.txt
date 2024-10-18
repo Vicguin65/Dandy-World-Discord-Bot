@@ -4,7 +4,4 @@ Complete Deletion
     disbanding
     Clear voice and text channels
 
-Write helper function for options for select
-
-BUGS:
-SELECT ONLY SELECT ONCE
+Print Team

@@ -17,6 +17,9 @@ bot = commands.Bot(command_prefix='/', intents=intents)
 
 # Dictionary to track active parties. Key is the party creator's ID, value is a list of members in the party.
 active_parties = {}
+members_party_dict = {}
+# int : int
+# player : party leader
 
 def get_party_options(character_dict: dict):
     message = ""
@@ -41,8 +44,6 @@ class JoinToonSelect(Select):
         self.party_owner = party_owner
 
     async def callback(self, interaction: discord.Interaction):
-        global active_parties
-        
         # Assume character_selected has selected a valid character
         character_selected = self.values[0]
         active_parties[self.party_owner]['current_members'] += 1
@@ -54,6 +55,7 @@ class JoinToonSelect(Select):
         # Add user to party
         character_dict = active_parties[self.party_owner]['character_list']
         character_dict[character_selected]['players'].append(interaction.user.id)
+        members_party_dict[interaction.user.id] = self.party_owner
 
         # Grant permissions to user for channels
         text_channel = bot.get_channel(active_parties[self.party_owner]['text'])
@@ -75,7 +77,6 @@ class JoinPartyButton(Button):
 
     async def callback(self, interaction: discord.Interaction):
         user = interaction.user
-        global active_parties
 
         party_dict = active_parties.get(self.party_owner, None)
         if party_dict is None:
@@ -110,18 +111,19 @@ class LeavePartyButton(Button):
         self.party_owner = party_owner  # Store the ID of the party creator
 
     async def callback(self, interaction: discord.Interaction):
-        user = interaction.user
-        global active_parties
+        # user = interaction.user
+        # global active_parties
 
-        party_members = active_parties.get(self.party_owner, [])
+        # party_members = active_parties.get(self.party_owner, [])
 
-        # Handle leaving the party
-        if user not in party_members:
-            await interaction.response.send_message(f"{user.mention}, you are not in the party!", ephemeral=True)
-        else:
-            party_members.remove(user)
-            active_parties[self.party_owner] = party_members
-            await interaction.response.send_message(f"{user.mention} has left the party. ({len(party_members)}/8)", ephemeral=False)
+        # # Handle leaving the party
+        # if user not in party_members:
+        #     await interaction.response.send_message(f"{user.mention}, you are not in the party!", ephemeral=True)
+        # else:
+        #     party_members.remove(user)
+        #     active_parties[self.party_owner] = party_members
+        #     await interaction.response.send_message(f"{user.mention} has left the party. ({len(party_members)}/8)", ephemeral=False)
+        pass
 
 
 class LeavePartyView(View):
@@ -139,8 +141,6 @@ class PartyView(View):
 
 
 async def create_party_channels(guild: discord.Guild, party_leader: discord.User):
-    global active_parties
-
     # Create a new category
     category = await guild.create_category(party_leader.display_name + "'s Party")
     active_parties[party_leader.id]['category'] = category.id
@@ -166,7 +166,7 @@ async def create_party_channels(guild: discord.Guild, party_leader: discord.User
     await voice_channel.set_permissions(guild.default_role, connect=False)
 
 
-class ToonSelect(Select):
+class LeaderToonSelect(Select):
     def __init__(self, character_dict):
         super().__init__()
         self.placeholder = 'Pick your toon!'
@@ -179,18 +179,17 @@ class ToonSelect(Select):
         self.character_dict = character_dict
 
     async def callback(self, interaction: discord.Interaction):
-        global active_parties
-        
         character_dict = active_parties[interaction.user.id]['character_list']
-
         character_selected = self.values[0]
         
         # Disable Select
         self.disabled = True
         await interaction.response.edit_message(content=f'You selected {character_selected.capitalize()}!', view=self.view)
-        
+
+        # Add player to party
         character_dict[character_selected]['players'].append(interaction.user.id)
         active_parties[interaction.user.id]['current_members']+=1
+        members_party_dict[interaction.user.id] = interaction.user.id
 
         message = f"Join {interaction.user.mention}'s party!\n"
         message += get_party_options(character_dict)
@@ -198,17 +197,18 @@ class ToonSelect(Select):
         await create_party_channels(interaction.guild, interaction.user)
 
         await interaction.followup.send(message, view=PartyView(interaction.user.id))
+        self.view.stop()
 
 
-class ToonSelectView(View):
-    def __init__(self, character_dict):
+class LeaderToonSelectView(View):
+    def __init__(self, character_dict, party_owner: int):
         super().__init__()
-
-        self.add_item(ToonSelect(character_dict))
+        self.add_item(LeaderToonSelect(character_dict))
+        self.party_owner = party_owner
 
     # TODO RESOLVE TIMEOUT
     def on_timeout(self):
-        print("TIMEDOUT")
+        del active_parties[self.party_owner]
         return
 
 # @bot.tree.command(name="testfunc", description="test function REMOVE LATER")
@@ -228,7 +228,6 @@ class ToonSelectView(View):
 @bot.tree.command(name="create-party", description="Start a party, include all the toons you want in your party (including yourself!)")
 async def create_party(interaction: discord.Interaction, any: int = 0, astro: int = 0, boxten: int = 0, brightney: int = 0, cosmo: int = 0, finn: int = 0, flutter: int = 0, gigi: int = 0, glisten: int = 0, goob: int = 0,
                        pebble: int = 0, poppy: int = 0, razzledazzle: int = 0, rodger: int = 0, scraps: int = 0, shelly: int = 0, shrimpo: int = 0, sprout: int = 0, teagan: int = 0, tisha: int = 0, toodles: int = 0, vee: int = 0):
-    global active_parties
 
     # Check if the party creator already has an active party
     if interaction.user.id in active_parties:
@@ -269,12 +268,11 @@ async def create_party(interaction: discord.Interaction, any: int = 0, astro: in
         return
 
     # Initialize a new party for the user
-    # active_parties[interaction.user.id] = [interaction.user.id]
     active_parties[interaction.user.id] = {'character_list': character_dict}
     active_parties[interaction.user.id]['current_members'] = 0
     active_parties[interaction.user.id]['max_members'] = total_characters
 
-    await interaction.response.send_message("Select your toon!", view=ToonSelectView(character_dict), ephemeral=True)
+    await interaction.response.send_message("Select your toon!", view=LeaderToonSelectView(character_dict, interaction.user.id), ephemeral=True)
 
 
 @bot.event
