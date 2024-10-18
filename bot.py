@@ -47,6 +47,10 @@ class JoinToonSelect(Select):
         character_selected = self.values[0]
         active_parties[self.party_owner]['current_members'] += 1
         
+        # Disable Select
+        self.disabled = True
+        await interaction.response.edit_message(content=f'You selected {character_selected.capitalize()}!', view=self.view)
+        
         # Add user to party
         character_dict = active_parties[self.party_owner]['character_list']
         character_dict[character_selected]['players'].append(interaction.user.id)
@@ -61,7 +65,7 @@ class JoinToonSelect(Select):
         await text_channel.send(f"{interaction.user.mention} has joined the party as {character_selected.capitalize()}! @here")
         
         view = LeavePartyView(self.party_owner)
-        await interaction.response.send_message(f"{interaction.user.mention}, click the button below if you want to leave the party.", view=view, ephemeral=True)
+        await interaction.followup.send(f"{interaction.user.mention}, click the button below if you want to leave the party.", view=view, ephemeral=True)
 
 
 class JoinPartyButton(Button):
@@ -181,6 +185,10 @@ class ToonSelect(Select):
 
         character_selected = self.values[0]
         
+        # Disable Select
+        self.disabled = True
+        await interaction.response.edit_message(content=f'You selected {character_selected.capitalize()}!', view=self.view)
+        
         character_dict[character_selected]['players'].append(interaction.user.id)
         active_parties[interaction.user.id]['current_members']+=1
 
@@ -189,7 +197,7 @@ class ToonSelect(Select):
 
         await create_party_channels(interaction.guild, interaction.user)
 
-        await interaction.response.send_message(message, view=PartyView(interaction.user.id))
+        await interaction.followup.send(message, view=PartyView(interaction.user.id))
 
 
 class ToonSelectView(View):
