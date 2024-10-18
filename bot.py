@@ -46,13 +46,13 @@ class JoinToonSelect(Select):
     async def callback(self, interaction: discord.Interaction):
         # Assume character_selected has selected a valid character
         character_selected = self.values[0]
-        active_parties[self.party_owner]['current_members'] += 1
         
         # Disable Select
         self.disabled = True
         await interaction.response.edit_message(content=f'You selected {character_selected.capitalize()}!', view=self.view)
         
         # Add user to party
+        active_parties[self.party_owner]['current_members'] += 1
         character_dict = active_parties[self.party_owner]['character_list']
         character_dict[character_selected]['players'].append(interaction.user.id)
         members_party_dict[interaction.user.id] = self.party_owner
