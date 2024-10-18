@@ -1,5 +1,10 @@
-Complete happy path from selecting toon 
-    FIX JoinPartyButton
-    creation of room happens first, store that information
+Complete Deletion
+    Deletion of data
+    Timing out
+    disbanding
+    Clear voice and text channels
 
-Clear voice and text channels
+Write helper function for options for select
+
+BUGS:
+SELECT ONLY SELECT ONCE
