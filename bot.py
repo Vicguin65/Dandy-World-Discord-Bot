@@ -310,17 +310,17 @@ class DisbandButton(Button):
         
         # Delete channels
         if active_parties[interaction.user.id].get('text') is not None:
-            text = await bot.get_channel(active_parties[interaction.user.id]['text'])
+            text = bot.get_channel(active_parties[interaction.user.id]['text'])
             if text is not None:
                 text.delete()
 
         if active_parties[interaction.user.id].get('voice') is not None:
-            voice = await bot.get_channel(active_parties[interaction.user.id]['voice'])
+            voice = bot.get_channel(active_parties[interaction.user.id]['voice'])
             if voice is not None:
                 voice.delete()
         
         if active_parties[interaction.user.id].get('category') is not None:
-            category = await bot.get_channel(active_parties[interaction.user.id]['category'])
+            category = bot.get_channel(active_parties[interaction.user.id]['category'])
             if category is not None:
                 category.delete()
         
