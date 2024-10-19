@@ -1,9 +1,3 @@
-Complete Deletion
-    Deletion of data
-    Timing out
-    disbanding
-    Clear voice and text channels
-
 Print Team
 
 The PartyView message must be updated to reflect changes
