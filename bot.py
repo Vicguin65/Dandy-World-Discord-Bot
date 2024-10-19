@@ -91,6 +91,12 @@ class LeavePartyButton(Button):
 
         await text_channel.send(f"{user.mention} has left the party. \n{active_parties[leader_id]['current_members']}/{active_parties[leader_id]['max_members']} total players.")
 
+        # Edit original message
+        character_dict = active_parties[leader_id]['character_list']
+        message = f"Join {party_leader.mention}'s party!\n"
+        message += get_party_options(character_dict)
+        edited_message = await interaction.channel.fetch_message(active_parties[leader_id]['message_id'])
+        await edited_message.edit(content=message)
 
 class LeavePartyView(View):
     def __init__(self):
@@ -138,6 +144,13 @@ class JoinToonSelect(Select):
 
         await text_channel.send(f"{interaction.user.mention} has joined the party as {character_selected.capitalize()}!\n{active_parties[self.party_owner]['current_members']}/{active_parties[self.party_owner]['max_members']} total players @here")
 
+        # Edit the original party view message
+        party_leader = await bot.fetch_user(self.party_owner)
+        message = f"Join {party_leader.mention}'s party!\n"
+        message += get_party_options(character_dict)
+        edited_message = await interaction.channel.fetch_message(active_parties[self.party_owner]['message_id'])
+        await edited_message.edit(content=message)
+        
         view = LeavePartyView()
         await interaction.followup.send(f"{interaction.user.mention}, click the button below if you want to leave the party.", view=view, ephemeral=True)
 
@@ -243,7 +256,8 @@ class LeaderToonSelect(Select):
 
         await create_party_channels(interaction.guild, interaction.user)
 
-        await interaction.followup.send(message, view=PartyView(interaction.user.id))
+        message = await interaction.followup.send(message, view=PartyView(interaction.user.id))
+        active_parties[interaction.user.id]['message_id'] = message.id
         self.view.stop()
 
 
@@ -257,6 +271,7 @@ class LeaderToonSelectView(View):
     def on_timeout(self):
         del active_parties[self.party_owner]
         return
+    
 
 # @bot.tree.command(name="testfunc", description="test function REMOVE LATER")
 # async def testfunc(interaction: discord.Interaction):
@@ -294,11 +309,22 @@ class DisbandButton(Button):
                     del members_party_dict[player]
         
         # Delete channels
-        await bot.get_channel(active_parties[interaction.user.id]['text']).delete()
-        await bot.get_channel(active_parties[interaction.user.id]['voice']).delete()
-        await bot.get_channel(active_parties[interaction.user.id]['category']).delete()
-        del active_parties[interaction.user.id]
+        if active_parties[interaction.user.id].get('text') is not None:
+            text = await bot.get_channel(active_parties[interaction.user.id]['text'])
+            if text is not None:
+                text.delete()
+
+        if active_parties[interaction.user.id].get('voice') is not None:
+            voice = await bot.get_channel(active_parties[interaction.user.id]['voice'])
+            if voice is not None:
+                voice.delete()
         
+        if active_parties[interaction.user.id].get('category') is not None:
+            category = await bot.get_channel(active_parties[interaction.user.id]['category'])
+            if category is not None:
+                category.delete()
+        
+        del active_parties[interaction.user.id]
         await interaction.response.send_message("Successfully disbanded party.", ephemeral=True)
            
 
@@ -322,8 +348,6 @@ async def create_party(interaction: discord.Interaction, any: int = 0, astro: in
     if interaction.user.id in active_parties:
         await interaction.response.send_message(f"{interaction.user.mention}, you already have an active party! Run /disband-party to disband your party!", ephemeral=True)
         return
-
-    # TODO CHECK IF IN party where not leader
 
     # Create character dictionary of needed/have
     character_dict = {
