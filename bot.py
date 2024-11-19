@@ -61,14 +61,8 @@ class LeavePartyButton(Button):
     async def callback(self, interaction: discord.Interaction):
         user = interaction.user
 
-        # print(0)
-        # print(members_party_dict)
-        # print(active_parties)
-
         leaved, leader_id = leave_party_dict(user.id)
-        # print(1)
-        # print(members_party_dict)
-        # print(active_parties)
+        
         if not leaved:
             leader = members_party_dict.get(user.id, None)
             if leader is None:
@@ -142,7 +136,7 @@ class JoinToonSelect(Select):
         await text_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
         await voice_channel.set_permissions(interaction.user, connect=True, speak=True)
 
-        await text_channel.send(f"{interaction.user.mention} has joined the party as {character_selected.capitalize()}!\n{active_parties[self.party_owner]['current_members']}/{active_parties[self.party_owner]['max_members']} total players @here")
+        await text_channel.send(f"{interaction.user.mention} has joined the party as {character_selected.capitalize()}!\n{active_parties[self.party_owner]['current_members']}/{active_parties[self.party_owner]['max_members']} total players")
 
         # Edit the original party view message
         party_leader = await bot.fetch_user(self.party_owner)
@@ -272,19 +266,6 @@ class LeaderToonSelectView(View):
         del active_parties[self.party_owner]
         return
     
-
-# @bot.tree.command(name="testfunc", description="test function REMOVE LATER")
-# async def testfunc(interaction: discord.Interaction):
-#     global active_parties
-#     import pprint
-
-#     pprint.pprint(active_parties)
-#     await bot.get_channel(active_parties[interaction.user.id]['text']).delete()
-#     await bot.get_channel(active_parties[interaction.user.id]['voice']).delete()
-#     await bot.get_channel(active_parties[interaction.user.id]['category']).delete()
-#     # print(active_parties)
-
-    # await interaction.response.send_message("HI")
 
 @bot.tree.command(name="leave-party", description="Leave your current party.")
 async def leave_party(interaction: discord.Interaction):
