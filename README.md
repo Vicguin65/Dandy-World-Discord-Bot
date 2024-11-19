@@ -1,7 +1,5 @@
 # Dandy World Discord
 
-Thanks! Here's a polished README for **Dandy's World Bot**:
-
 ---
 
 # Dandy's World Bot
@@ -38,7 +36,7 @@ A Discord bot programmed in Python using `discord.py`, created as a tool for the
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/dandys-world-bot.git
+   git clone https://github.com/USERNAME/dandys-world-bot.git
    cd dandys-world-bot
    ```
 
