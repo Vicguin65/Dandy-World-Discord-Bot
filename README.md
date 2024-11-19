@@ -105,7 +105,7 @@ This project is licensed under the [MIT License](LICENSE).
 
 For questions or feedback, feel free to reach out:
 
-- **GitHub**: [yourusername](https://github.com/yourusername)
+- **GitHub**: [Vicguin65](https://github.com/Vicguin65)
 - **Portfolio**: [whoistylerdu.com](https://whoistylerdu.com)
 
 ---
