@@ -2,8 +2,6 @@
 
 ---
 
-# Dandy's World Bot
-
 A Discord bot programmed in Python using `discord.py`, created as a tool for the Roblox game **Dandy's World**. This bot lets you enhance your adventures by creating and managing parties of characters directly from your Discord server.
 
 ---
