@@ -26,8 +26,7 @@ def get_party_options(character_dict: dict):
     message = ""
     for i in character_dict:
         if character_dict[i]['wanted'] > 0:
-            message += f"{i.capitalize()} : {len(character_dict[i]['players'])}/{
-                character_dict[i]['wanted']}\n"
+            message += f"{i.capitalize()} : {len(character_dict[i]['players'])}/{character_dict[i]['wanted']}\n"
 
     return message
 
