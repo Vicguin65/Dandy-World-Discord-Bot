@@ -61,7 +61,7 @@ class LeavePartyButton(Button):
         user = interaction.user
 
         leaved, leader_id = leave_party_dict(user.id)
-        
+
         if not leaved:
             leader = members_party_dict.get(user.id, None)
             if leader is None:
@@ -90,6 +90,7 @@ class LeavePartyButton(Button):
         message += get_party_options(character_dict)
         edited_message = await interaction.channel.fetch_message(active_parties[leader_id]['message_id'])
         await edited_message.edit(content=message)
+
 
 class LeavePartyView(View):
     def __init__(self):
@@ -143,7 +144,7 @@ class JoinToonSelect(Select):
         message += get_party_options(character_dict)
         edited_message = await interaction.channel.fetch_message(active_parties[self.party_owner]['message_id'])
         await edited_message.edit(content=message)
-        
+
         view = LeavePartyView()
         await interaction.followup.send(f"{interaction.user.mention}, click the button below if you want to leave the party.", view=view, ephemeral=True)
 
@@ -264,11 +265,12 @@ class LeaderToonSelectView(View):
     def on_timeout(self):
         del active_parties[self.party_owner]
         return
-    
+
 
 @bot.tree.command(name="leave-party", description="Leave your current party.")
 async def leave_party(interaction: discord.Interaction):
     await interaction.response.send_message("Click the button below to leave your current party if you are in one.", view=LeavePartyView(), ephemeral=True)
+
 
 class DisbandButton(Button):
     def __init__(self):
@@ -278,16 +280,16 @@ class DisbandButton(Button):
         if active_parties.get(interaction.user.id) is None:
             await interaction.response.send_message("You are not currently hosting any parties.", ephemeral=True)
             return
-        
+
         character_dict = active_parties[interaction.user.id]['character_list']
-        
+
         # clear players in party
         for character in character_dict:
             if len(character_dict[character]['players']) > 0:
                 list_players = character_dict[character]['players']
                 for player in list_players:
                     del members_party_dict[player]
-        
+
         # Delete channels
         if active_parties[interaction.user.id].get('text') is not None:
             text = bot.get_channel(active_parties[interaction.user.id]['text'])
@@ -295,18 +297,20 @@ class DisbandButton(Button):
                 await text.delete()
 
         if active_parties[interaction.user.id].get('voice') is not None:
-            voice = bot.get_channel(active_parties[interaction.user.id]['voice'])
+            voice = bot.get_channel(
+                active_parties[interaction.user.id]['voice'])
             if voice is not None:
                 await voice.delete()
-        
+
         if active_parties[interaction.user.id].get('category') is not None:
-            category = bot.get_channel(active_parties[interaction.user.id]['category'])
+            category = bot.get_channel(
+                active_parties[interaction.user.id]['category'])
             if category is not None:
                 await category.delete()
-        
+
         del active_parties[interaction.user.id]
         await interaction.response.send_message("Successfully disbanded party.", ephemeral=True)
-           
+
 
 class DisbandView(View):
     def __init__(self):
@@ -315,14 +319,15 @@ class DisbandView(View):
         self.timeout = None
         self.add_item(DisbandButton())
 
+
 @bot.tree.command(name="disband-party", description="Disband your current party.")
 async def disband_party(interaction: discord.Interaction):
     await interaction.response.send_message("Click the button below to disband your party if you have one.", view=DisbandView(), ephemeral=True)
 
 
 @bot.tree.command(name="create-party", description="Start a party, include all the toons you want in your party (including yourself!)")
-async def create_party(interaction: discord.Interaction, any: int = 0, astro: int = 0, boxten: int = 0, brightney: int = 0, cosmo: int = 0, finn: int = 0, flutter: int = 0, gigi: int = 0, glisten: int = 0, goob: int = 0,
-                       pebble: int = 0, poppy: int = 0, razzledazzle: int = 0, rodger: int = 0, scraps: int = 0, shelly: int = 0, shrimpo: int = 0, sprout: int = 0, teagan: int = 0, tisha: int = 0, toodles: int = 0, vee: int = 0):
+async def create_party(interaction: discord.Interaction, any: int = 0, astro: int = 0, boxten: int = 0, brightney: int = 0, connie: int = 0, cosmo: int = 0, finn: int = 0, flutter: int = 0, gigi: int = 0, glisten: int = 0, goob: int = 0, looey: int = 0,
+                       pebble: int = 0, poppy: int = 0, razzledazzle: int = 0, rodger: int = 0, scraps: int = 0, shelly: int = 0, shrimpo: int = 0, sprout: int = 0, teagan: int = 0, tisha: int = 0, toodles: int = 0, vee: int = 0, yatta: int = 0):
 
     # Check if the party creator already has an active party
     if interaction.user.id in active_parties:
@@ -333,15 +338,17 @@ async def create_party(interaction: discord.Interaction, any: int = 0, astro: in
     character_dict = {
         'any toon': {'wanted': any, 'players': []}, 'astro': {'wanted': astro, 'players': []},
         'boxten': {'wanted': boxten, 'players': []}, 'brightney': {'wanted': brightney, 'players': []},
-        'cosmo': {'wanted': cosmo, 'players': []}, 'finn': {'wanted': finn, 'players': []},
-        'flutter': {'wanted': flutter, 'players': []}, 'gigi': {'wanted': gigi, 'players': []},
-        'glisten': {'wanted': glisten, 'players': []}, 'goob': {'wanted': goob, 'players': []},
+        'connie': {'wanted': connie, 'players': []}, 'cosmo': {'wanted': cosmo, 'players': []},
+        'finn': {'wanted': finn, 'players': []}, 'flutter': {'wanted': flutter, 'players': []},
+        'gigi': {'wanted': gigi, 'players': []}, 'glisten': {'wanted': glisten, 'players': []},
+        'goob': {'wanted': goob, 'players': []}, 'looey': {'wanted': looey, 'players': []},
         'pebble': {'wanted': pebble, 'players': []}, 'poppy': {'wanted': poppy, 'players': []},
         'razzledazzle': {'wanted': razzledazzle, 'players': []}, 'rodger': {'wanted': rodger, 'players': []},
         'scraps': {'wanted': scraps, 'players': []}, 'shelly': {'wanted': shelly, 'players': []},
         'shrimpo': {'wanted': shrimpo, 'players': []}, 'sprout': {'wanted': sprout, 'players': []},
         'teagan': {'wanted': teagan, 'players': []}, 'tisha': {'wanted': tisha, 'players': []},
-        'toodles': {'wanted': toodles, 'players': []}, 'vee': {'wanted': vee, 'players': []}
+        'toodles': {'wanted': toodles, 'players': []}, 'vee': {'wanted': vee, 'players': []},
+        'yatta': {'wanted': yatta, 'players': []}
     }
 
     # Basic error checks
